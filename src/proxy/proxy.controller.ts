@@ -10,9 +10,26 @@ export class ProxyController {
   @Get()
   async getModifiedContent(@Query('url') url: string, @Res() res: Response) {
     const targetUrl = `https://docs.nestjs.com${url || ''}`;
-    this.proxyService.fetchAndModifyContent(targetUrl).subscribe(response => {
-      res.setHeader('Content-Type', response.headers['content-type']);
-      res.send(response.data);
+    this.proxyService.fetchAndModifyContent(targetUrl).subscribe(data => {
+      res.set('Content-Type', this.getContentType(url));
+      res.send(data);
     });
+  }
+
+  private getContentType(url: string): string {
+    if (!url) return 'text/plain';
+    if (url.endsWith('.js')) {
+      return 'application/javascript';
+    } else if (url.endsWith('.css')) {
+      return 'text/css';
+    } else if (url.endsWith('.html')) {
+      return 'text/html';
+    } else if (url.endsWith('.png')) {
+      return 'image/png';
+    } else if (url.endsWith('.jpg') || url.endsWith('.jpeg')) {
+      return 'image/jpeg';
+    } else {
+      return 'text/plain';
+    }
   }
 }
